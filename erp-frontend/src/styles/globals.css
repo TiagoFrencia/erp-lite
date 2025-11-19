@@ -1,0 +1,23 @@
+:root {
+  --bg: #0F172A;
+  --paper: #1E293B;
+  --primary: #FF4433;
+  --text: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --success: #22C55E;
+  --warning: #EAB308;
+  --error: #EF4444;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  /* Degradado sutil para dar profundidad */
+  background: linear-gradient(180deg, #0F172A 0%, #0C1220 100%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--primary); }

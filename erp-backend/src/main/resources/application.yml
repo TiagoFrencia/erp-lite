@@ -1,0 +1,108 @@
+server:
+  port: ${PORT:8081}
+
+spring:
+  application:
+    name: erp-backend
+
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  mvc:
+    format:
+      date-time: iso
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/erp}
+    username: ${DB_USER:erp}
+    password: ${DB_PASS:erp}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+# ============================================
+# 🔥 JWT (compatibilidad TOTAL)
+# Usa security.jwt.* que es lo que inyecta JwtUtil
+# Si NO existe JWT_SECRET en el entorno,
+# usa un secreto Base64 válido por defecto.
+# ============================================
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:dGhpc19pcy1hLXZlcnktc2VjdXJlLXNlY3JldC1mb3ItZXJwLXRpYWdvLTEyMzQ1Njc4OQ==}
+    access-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:120}
+    refresh-ttl-minutes: ${JWT_REFRESH_TTL_MINUTES:43200}
+
+# Silenciar warning Security
+logging:
+  level:
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+
+# ---------- Perfil: dev ----------
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-dev.sql
+
+# ---------- Perfil: test ----------
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  sql:
+    init:
+      mode: never
+
+# ---------- Perfil: prod ----------
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    hikari:
+      maximum-pool-size: 20
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
