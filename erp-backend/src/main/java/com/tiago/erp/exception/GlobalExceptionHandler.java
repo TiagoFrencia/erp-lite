@@ -14,74 +14,97 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Body inválido @Valid (DTOs)
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    // ==========================
+    //  Ejemplos de handlers específicos
+    //  (dejo estructura genérica; si tenías otros, mantenelos)
+    // ==========================
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
-        Map<String, String> fieldErrors = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(err -> fieldErrors.put(err.getField(), err.getDefaultMessage()));
+    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex,
+                                                     HttpServletRequest req) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(err ->
+                errors.put(err.getField(), err.getDefaultMessage())
+        );
 
         ApiError body = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                "Error de validación",
+                "Validation Error",
+                "Datos inválidos",
                 req.getRequestURI(),
-                fieldErrors
+                errors
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity.badRequest().body(body);
     }
 
-    // @RequestParam / @PathVariable inválidos (Bean Validation)
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest req) {
-        Map<String, String> fieldErrors = new LinkedHashMap<>();
-        ex.getConstraintViolations().forEach(v -> fieldErrors.put(v.getPropertyPath().toString(), v.getMessage()));
+    public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException ex,
+                                                              HttpServletRequest req) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        ex.getConstraintViolations().forEach(cv ->
+                errors.put(cv.getPropertyPath().toString(), cv.getMessage())
+        );
 
         ApiError body = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                "Parámetros inválidos",
+                "Constraint Violation",
+                "Datos inválidos",
                 req.getRequestURI(),
-                fieldErrors
+                errors
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity.badRequest().body(body);
     }
 
-    // Tipos inválidos en parámetros (ej: id no numérico) + faltantes
-    @ExceptionHandler({ MissingServletRequestParameterException.class, MethodArgumentTypeMismatchException.class })
-    public ResponseEntity<ApiError> handleBadParams(Exception ex, HttpServletRequest req) {
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> handleMissingParam(MissingServletRequestParameterException ex,
+                                                       HttpServletRequest req) {
+
         ApiError body = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
+                "Missing Parameter",
                 ex.getMessage(),
                 req.getRequestURI(),
                 null
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity.badRequest().body(body);
     }
 
-    // Errores de negocio controlados (ej: "Stock insuficiente")
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+                                                       HttpServletRequest req) {
+
         ApiError body = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
+                "Type Mismatch",
                 ex.getMessage(),
                 req.getRequestURI(),
                 null
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    return ResponseEntity.badRequest().body(body);
     }
 
-    // Catch-all
+    // ==========================
+    //  Catch-all (lo importante)
+    // ==========================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, HttpServletRequest req) {
+
+        // 🔥 ESTA LÍNEA ES LA CLAVE:
+        // Logueamos el error con stacktrace para verlo en Render
+        log.error("Unhandled exception in {}: {}", req.getRequestURI(), ex.getMessage(), ex);
+
         ApiError body = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
