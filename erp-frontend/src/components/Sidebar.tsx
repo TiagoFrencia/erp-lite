@@ -8,13 +8,12 @@ export default function Sidebar() {
 
   useEffect(() => {
     let active = true;
-    // sin endpoint especial; usa /products con stockLt para contar
-    getLowStockCount(5)
+    getLowStockCount()
       .then((n) => active && setLowStock(n))
       .catch(() => {});
-    return () => {
+      return () => {
       active = false;
-    };
+      };
   }, []);
 
   const links: Array<{ to: string; label: string; withBadge?: boolean }> = [
