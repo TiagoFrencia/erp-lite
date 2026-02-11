@@ -11,5 +11,5 @@ FROM eclipse-temurin:21-jre
 ENV JAVA_OPTS=""
 WORKDIR /opt/app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8081
+EXPOSE 8080
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]

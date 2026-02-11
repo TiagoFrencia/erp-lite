@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:8081}
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -15,8 +15,8 @@ spring:
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5434/erp}
-    username: ${DB_USER:erp}
-    password: ${DB_PASS:erp}
+    username: ${DB_USERNAME:erp}
+    password: ${DB_PASSWORD:erp}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -94,8 +94,8 @@ spring:
       on-profile: prod
   datasource:
     url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASS}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 20
   jpa:
