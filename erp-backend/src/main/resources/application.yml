@@ -21,6 +21,15 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 2
 
+  jpa:
+    properties:
+      hibernate:
+        default_schema: erp_schema
+  
+  sql:
+    init:
+      mode: always
+
 springdoc:
   api-docs:
     path: /v3/api-docs
