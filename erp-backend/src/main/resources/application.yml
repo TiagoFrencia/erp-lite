@@ -22,6 +22,8 @@ spring:
       minimum-idle: 2
 
   jpa:
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         default_schema: erp_schema
