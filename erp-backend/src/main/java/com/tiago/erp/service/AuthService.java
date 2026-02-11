@@ -5,6 +5,7 @@ import com.tiago.erp.repository.UserRepository;
 import com.tiago.erp.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder; // Import added
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -16,22 +17,44 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     public AuthService(
             AuthenticationManager authenticationManager,
             JwtUtil jwtUtil,
-            UserRepository userRepository
-    ) {
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public void register(com.tiago.erp.dto.RegisterRequest req) {
+        if (userRepository.findByUsername(req.username()).isPresent()) {
+            throw new RuntimeException("El usuario ya existe");
+        }
+
+        var user = new User();
+        user.setUsername(req.username());
+        user.setPasswordHash(passwordEncoder.encode(req.password()));
+        // El primer usuario podría ser ADMIN, o lógica simple: si username == 'admin',
+        // es ADMIN
+        if ("admin".equalsIgnoreCase(req.username())) {
+            user.setRole(com.tiago.erp.model.Role.ADMIN);
+        } else {
+            user.setRole(com.tiago.erp.model.Role.USER);
+        }
+
+        user.setActive(true);
+        userRepository.save(user);
     }
 
     public Map<String, String> login(String username, String password) {
 
         // 🔐 Autentica usuario
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
+                new UsernamePasswordAuthenticationToken(username, password));
 
         // 🔎 Busca el usuario en la BD
         User user = userRepository.findByUsername(username).orElseThrow();
@@ -43,8 +66,7 @@ public class AuthService {
         return Map.of(
                 "accessToken", access,
                 "refreshToken", refresh,
-                "tokenType", "Bearer"
-        );
+                "tokenType", "Bearer");
     }
 
     public Map<String, String> refresh(String refreshToken) {
@@ -59,7 +81,6 @@ public class AuthService {
 
         return Map.of(
                 "accessToken", access,
-                "tokenType", "Bearer"
-        );
+                "tokenType", "Bearer");
     }
 }

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import SalesPage from './pages/SalesPage';
 import CreateSalePage from './pages/CreateSalePage';
@@ -19,6 +20,7 @@ export default function App() {
     <Routes>
       {/* Pública */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       {/* Privadas */}
       <Route element={<ProtectedRoute />}>

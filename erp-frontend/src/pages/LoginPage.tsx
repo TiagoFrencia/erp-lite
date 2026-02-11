@@ -169,6 +169,25 @@ const LoginPage: React.FC = () => {
             >
               ¿Olvidaste tu contraseña?
             </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              textAlign="center"
+              sx={{ pt: 1 }}
+            >
+              ¿No tienes cuenta?{' '}
+              <span
+                style={{
+                  color: '#ff6b60',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+                onClick={() => navigate('/register')}
+              >
+                Regístrate aquí
+              </span>
+            </Typography>
           </Stack>
         </Stack>
       </Paper>
