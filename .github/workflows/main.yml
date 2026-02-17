@@ -1,0 +1,14 @@
+name: Keep Alive Render
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Se ejecuta cada 10 minutos
+  workflow_dispatch: # Permite ejecutarlo manualmente para probar
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up Render
+        run: |
+          curl -I https://erp-lite.onrender.com/api/customers?page=0&size=10
